@@ -1,4 +1,5 @@
 from poetry.repositories.installed_repository import InstalledRepository
+from poetry.utils._compat import WINDOWS
 from poetry.utils._compat import Path
 from poetry.utils._compat import metadata
 from poetry.utils._compat import zipp
@@ -17,8 +18,16 @@ INSTALLED_RESULTS = [
         zipp.Path(str(SITE_PACKAGES / "foo-0.1.0-py3.8.egg"), "EGG-INFO")
     ),
     metadata.PathDistribution(VENDOR_DIR / "attrs-19.3.0.dist-info"),
-    metadata.PathDistribution(SITE_PACKAGES / "editable-2.3.4.dist-info"),
 ]
+
+if WINDOWS:
+    INSTALLED_RESULTS.append(
+        metadata.PathDistribution(SITE_PACKAGES / "editable-windows-2.3.4.dist-info")
+    )
+else:
+    INSTALLED_RESULTS.append(
+        metadata.PathDistribution(SITE_PACKAGES / "editable-2.3.4.dist-info")
+    )
 
 
 class MockEnv(BaseMockEnv):
@@ -72,7 +81,15 @@ def test_load(mocker):
         assert pkg.name != "attrs"
 
     editable = repository.packages[1]
-    assert "editable" == editable.name
+    if WINDOWS:
+        assert "editable-windows" == editable.name
+    else:
+        assert "editable" == editable.name
+
     assert "2.3.4" == editable.version.text
     assert "directory" == editable.source_type
-    assert "/path/to/editable" == editable.source_url
+
+    if WINDOWS:
+        assert "C:/path/to/editable" == editable.source_url
+    else:
+        assert "/path/to/editable" == editable.source_url
