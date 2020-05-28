@@ -797,7 +797,7 @@ python-versions = "*"
 version = "1.4.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Core utilities for Python packages"
 name = "packaging"
 optional = false
