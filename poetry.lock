@@ -293,7 +293,6 @@ version = "0.3.0"
 [[package]]
 category = "main"
 description = "Discover and load entry points from installed packages."
-marker = "python_version >= \"2.7\" and python_version < \"2.8\""
 name = "entrypoints"
 optional = false
 python-versions = ">=2.7"
@@ -1512,7 +1511,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "6e86bcf4be1389d9d1dbd87bd5383089bec887c5a7e9c5e48b09b936699e035d"
+content-hash = "c8619bb1cabd99626cc3e82a0dc8107aa049b7122ddf4c9f6eb96e80ee678799"
 python-versions = "~2.7 || ^3.5"
 
 [metadata.files]
