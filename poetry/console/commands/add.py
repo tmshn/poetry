@@ -3,9 +3,10 @@ from cleo import option
 
 from .env_command import EnvCommand
 from .init import InitCommand
+from .mixins.with_installer import WithInstaller
 
 
-class AddCommand(EnvCommand, InitCommand):
+class AddCommand(EnvCommand, WithInstaller, InitCommand):
 
     name = "add"
     description = "Adds a new dependency to <comment>pyproject.toml</>."
@@ -56,7 +57,6 @@ If you do not specify a version constraint, poetry will choose a suitable one ba
     loggers = ["poetry.repositories.pypi_repository"]
 
     def handle(self):
-        from poetry.installation.installer import Installer
         from poetry.core.semver import parse_constraint
         from tomlkit import inline_table
 
@@ -149,26 +149,16 @@ If you do not specify a version constraint, poetry will choose a suitable one ba
         # Update packages
         self.reset_poetry()
 
-        installer = Installer(
-            self.io,
-            self.env,
-            self.poetry.package,
-            self.poetry.locker,
-            self.poetry.pool,
-            self.poetry.config,
-        )
-        installer.use_executor(
-            self.poetry.config.get("experimental.new-installer", False)
-        )
-
-        installer.dry_run(self.option("dry-run"))
-        installer.update(True)
+        self._installer.set_package(self.poetry.package)
+        self._installer.dry_run(self.option("dry-run"))
+        self._installer.update(True)
         if self.option("lock"):
-            installer.lock()
-        installer.whitelist([r["name"] for r in requirements])
+            self._installer.lock()
+
+        self._installer.whitelist([r["name"] for r in requirements])
 
         try:
-            status = installer.run()
+            status = self._installer.run()
         except Exception:
             self.poetry.file.write(original_content)
 

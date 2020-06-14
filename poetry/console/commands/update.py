@@ -2,9 +2,10 @@ from cleo import argument
 from cleo import option
 
 from .env_command import EnvCommand
+from .mixins.with_installer import WithInstaller
 
 
-class UpdateCommand(EnvCommand):
+class UpdateCommand(EnvCommand, WithInstaller):
 
     name = "update"
     description = (
@@ -28,30 +29,20 @@ class UpdateCommand(EnvCommand):
     loggers = ["poetry.repositories.pypi_repository"]
 
     def handle(self):
-        from poetry.installation.installer import Installer
-
         packages = self.argument("packages")
 
-        installer = Installer(
-            self.io,
-            self.env,
-            self.poetry.package,
-            self.poetry.locker,
-            self.poetry.pool,
-            self.poetry.config,
-        )
-        installer.use_executor(
+        self._installer.use_executor(
             self.poetry.config.get("experimental.new-installer", False)
         )
 
         if packages:
-            installer.whitelist({name: "*" for name in packages})
+            self._installer.whitelist({name: "*" for name in packages})
 
-        installer.dev_mode(not self.option("no-dev"))
-        installer.dry_run(self.option("dry-run"))
-        installer.execute_operations(not self.option("lock"))
+        self._installer.dev_mode(not self.option("no-dev"))
+        self._installer.dry_run(self.option("dry-run"))
+        self._installer.execute_operations(not self.option("lock"))
 
         # Force update
-        installer.update(True)
+        self._installer.update(True)
 
-        return installer.run()
+        return self._installer.run()
